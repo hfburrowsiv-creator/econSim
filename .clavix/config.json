@@ -1,0 +1,28 @@
+{
+  "version": "7.3.0",
+  "integrations": [
+    "agents-md",
+    "agent-skills-global",
+    "claude-code",
+    "codex",
+    "gemini"
+  ],
+  "templates": {
+    "prdQuestions": "default",
+    "fullPrd": "default",
+    "quickPrd": "default"
+  },
+  "outputs": {
+    "path": ".clavix/outputs",
+    "format": "markdown"
+  },
+  "preferences": {
+    "autoOpenOutputs": false,
+    "verboseLogging": false
+  },
+  "experimental": {
+    "integrationPaths": {
+      "codex": "~/.codex/prompts"
+    }
+  }
+}

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EconSim</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header>
+    <h1>EconSim</h1>
+    <p class="subtitle">Interactive Macroeconomic Model Visualizer</p>
+  </header>
+
+  <!-- ── Charts ─────────────────────────────────────────────────────────── -->
+  <div class="charts-grid">
+
+    <div class="chart-panel">
+      <div id="chart-islm" class="chart-container"></div>
+      <div class="formula" id="formula-islm">
+        <span class="eq-label">IS:</span> Y = C(Y&minus;T) + I(r) + G
+        &emsp;
+        <span class="eq-label">LM:</span> M/P = L(r, Y)
+      </div>
+    </div>
+
+    <div class="chart-panel">
+      <div id="chart-mm" class="chart-container"></div>
+      <div class="formula" id="formula-mm">
+        <span class="eq-label">M<sup>s</sup>:</span> M&#773;/P
+        &emsp;
+        <span class="eq-label">M<sup>d</sup>:</span> L(r, Y) = kY &minus; hr
+      </div>
+    </div>
+
+    <div class="chart-panel">
+      <div id="chart-adas" class="chart-container"></div>
+      <div class="formula" id="formula-adas">
+        <span class="eq-label">AS:</span> P = P<sub>e</sub> &middot; f(Y, Y&#772;)
+        &emsp;
+        <span class="eq-label">Y<sup>FE</sup>:</span> Y = Y&#772;
+        &emsp;
+        <span class="eq-label">AD:</span> derived from IS/LM
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Variable Controls ──────────────────────────────────────────────── -->
+  <div id="controls">
+    <h2 class="controls-heading">Adjust Variables</h2>
+    <div class="controls-row">
+
+      <!-- G — Government Spending -->
+      <div class="control-group">
+        <div class="var-label">G</div>
+        <div class="var-name">Gov't Spending</div>
+        <div class="btn-row">
+          <button data-var="G" data-action="up"   title="Increase G">▲</button>
+          <button data-var="G" data-action="same" title="Reset G">●</button>
+          <button data-var="G" data-action="down" title="Decrease G">▼</button>
+        </div>
+        <div class="var-state" data-display="G">G₀</div>
+        <div class="var-effect">IS →</div>
+      </div>
+
+      <!-- T — Taxes -->
+      <div class="control-group">
+        <div class="var-label">T</div>
+        <div class="var-name">Taxes</div>
+        <div class="btn-row">
+          <button data-var="T" data-action="up"   title="Increase T">▲</button>
+          <button data-var="T" data-action="same" title="Reset T">●</button>
+          <button data-var="T" data-action="down" title="Decrease T">▼</button>
+        </div>
+        <div class="var-state" data-display="T">T₀</div>
+        <div class="var-effect">IS ←</div>
+      </div>
+
+      <!-- M — Money Supply -->
+      <div class="control-group">
+        <div class="var-label">M</div>
+        <div class="var-name">Money Supply</div>
+        <div class="btn-row">
+          <button data-var="M" data-action="up"   title="Increase M">▲</button>
+          <button data-var="M" data-action="same" title="Reset M">●</button>
+          <button data-var="M" data-action="down" title="Decrease M">▼</button>
+        </div>
+        <div class="var-state" data-display="M">M₀</div>
+        <div class="var-effect">LM →, M<sup>s</sup> →</div>
+      </div>
+
+      <!-- P — Price Level -->
+      <div class="control-group">
+        <div class="var-label">P</div>
+        <div class="var-name">Price Level</div>
+        <div class="btn-row">
+          <button data-var="P" data-action="up"   title="Increase P">▲</button>
+          <button data-var="P" data-action="same" title="Reset P">●</button>
+          <button data-var="P" data-action="down" title="Decrease P">▼</button>
+        </div>
+        <div class="var-state" data-display="P">P₀</div>
+        <div class="var-effect">LM ←, M<sup>s</sup> ←</div>
+      </div>
+
+      <!-- Pe — Expected Price Level -->
+      <div class="control-group">
+        <div class="var-label">P<sub>e</sub></div>
+        <div class="var-name">Expected Price</div>
+        <div class="btn-row">
+          <button data-var="Pe" data-action="up"   title="Increase Pₑ">▲</button>
+          <button data-var="Pe" data-action="same" title="Reset Pₑ">●</button>
+          <button data-var="Pe" data-action="down" title="Decrease Pₑ">▼</button>
+        </div>
+        <div class="var-state" data-display="Pe">Pₑ₀</div>
+        <div class="var-effect">AS ↑</div>
+      </div>
+
+      <!-- Ybar — Potential Output -->
+      <div class="control-group">
+        <div class="var-label">Y&#772;</div>
+        <div class="var-name">Potential Output</div>
+        <div class="btn-row">
+          <button data-var="Ybar" data-action="up"   title="Increase Ȳ">▲</button>
+          <button data-var="Ybar" data-action="same" title="Reset Ȳ">●</button>
+          <button data-var="Ybar" data-action="down" title="Decrease Ȳ">▼</button>
+        </div>
+        <div class="var-state" data-display="Ybar">Ȳ₀</div>
+        <div class="var-effect">Y<sup>FE</sup> →</div>
+      </div>
+
+      <!-- Yf — Expected Future Income -->
+      <div class="control-group">
+        <div class="var-label">Y<sup>f</sup></div>
+        <div class="var-name">Exp. Future Income</div>
+        <div class="btn-row">
+          <button data-var="Yf" data-action="up"   title="Increase Yᶠ">▲</button>
+          <button data-var="Yf" data-action="same" title="Reset Yᶠ">●</button>
+          <button data-var="Yf" data-action="down" title="Decrease Yᶠ">▼</button>
+        </div>
+        <div class="var-state" data-display="Yf">Yᶠ₀</div>
+        <div class="var-effect">IS →</div>
+      </div>
+
+      <!-- W — Wealth -->
+      <div class="control-group">
+        <div class="var-label">W</div>
+        <div class="var-name">Wealth</div>
+        <div class="btn-row">
+          <button data-var="W" data-action="up"   title="Increase W">▲</button>
+          <button data-var="W" data-action="same" title="Reset W">●</button>
+          <button data-var="W" data-action="down" title="Decrease W">▼</button>
+        </div>
+        <div class="var-state" data-display="W">W₀</div>
+        <div class="var-effect">IS →</div>
+      </div>
+
+      <!-- MPKf — Expected Future Profitability of Capital -->
+      <div class="control-group">
+        <div class="var-label">MPK<sup>f</sup></div>
+        <div class="var-name">Exp. Future Profit.</div>
+        <div class="btn-row">
+          <button data-var="MPKf" data-action="up"   title="Increase MPKᶠ">▲</button>
+          <button data-var="MPKf" data-action="same" title="Reset MPKᶠ">●</button>
+          <button data-var="MPKf" data-action="down" title="Decrease MPKᶠ">▼</button>
+        </div>
+        <div class="var-state" data-display="MPKf">MPKᶠ₀</div>
+        <div class="var-effect">IS →</div>
+      </div>
+
+    </div><!-- .controls-row -->
+  </div><!-- #controls -->
+
+  <script src="js/model.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
