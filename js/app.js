@@ -17,11 +17,11 @@ const VAR_SYMBOLS = {
   Uopt: 'uK*',
   EPf:  "E(P')",
   IC:   'IC',
-  CR:   'CR',
 };
 
 function getStateLabel(key) {
-  const offset = state[key] - 5;
+  const base = BASE_STATE[key] ?? 5;
+  const offset = state[key] - base;
   const sym = VAR_SYMBOLS[key] || key;
   if (offset === 0) return sym + '₀';           // G₀ (baseline)
   if (offset > 0)   return sym + '₀ +' + offset; // G₀ +1
@@ -31,11 +31,20 @@ function getStateLabel(key) {
 function updateDisplay() {
   document.querySelectorAll('[data-display]').forEach(el => {
     const key = el.dataset.display;
-    const offset = state[key] - 5;
+    const base = BASE_STATE[key] ?? 5;
+    const offset = state[key] - base;
     el.textContent = getStateLabel(key);
     el.className = 'var-state' +
       (offset > 0 ? ' raised' : offset < 0 ? ' lowered' : '');
   });
+
+  const crButton = document.querySelector('[data-cr-toggle]');
+  const crStatus = document.querySelector('[data-cr-status]');
+  if (crButton) crButton.textContent = state.CRActive ? 'reset' : 'test';
+  if (crStatus) {
+    crStatus.textContent = state.CRActive ? 'active' : 'baseline';
+    crStatus.className = 'var-state' + (state.CRActive ? ' raised' : '');
+  }
 }
 
 function setVariable(key, action) {
@@ -46,7 +55,7 @@ function setVariable(key, action) {
 
   if      (action === 'up')   state[key] = Math.min(state[key] + STEP, MAX);
   else if (action === 'down') state[key] = Math.max(state[key] - STEP, MIN);
-  else if (action === 'same') state[key] = 5;
+  else if (action === 'same') state[key] = BASE_STATE[key] ?? 5;
   else return false;
 
   return true;
@@ -58,6 +67,16 @@ document.addEventListener('DOMContentLoaded', () => {
   updateDisplay();
 
   document.getElementById('controls').addEventListener('click', e => {
+    const crButton = e.target.closest('[data-cr-toggle]');
+    if (crButton) {
+      if (state.CRActive) resetState();
+      else state.CRActive = true;
+
+      updateCharts(state);
+      updateDisplay();
+      return;
+    }
+
     const btn = e.target.closest('[data-var]');
     if (!btn) return;
 

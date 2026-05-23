@@ -139,6 +139,10 @@ h1 {
   gap: 4px;
 }
 
+.scenario-row {
+  width: 100%;
+}
+
 .btn-row button {
   width: 30px;
   height: 30px;
@@ -152,13 +156,30 @@ h1 {
   line-height: 1;
 }
 
-.btn-row button:hover {
+.scenario-btn {
+  width: 100%;
+  min-height: 30px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #374151;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.btn-row button:hover,
+.scenario-btn:hover {
   background: #e0e7ff;
   border-color: #a5b4fc;
   color: #3730a3;
 }
 
-.btn-row button:active {
+.btn-row button:active,
+.scenario-btn:active {
   background: #c7d2fe;
   border-color: #818cf8;
 }
@@ -289,6 +310,10 @@ h1 {
     font-size: 0.78rem;
   }
 
+  .scenario-btn {
+    min-height: 32px;
+  }
+
   .var-state {
     font-size: 0.68rem;
   }
@@ -332,8 +357,22 @@ h1 {
     width: auto;
   }
 
+  .control-group-scenario .scenario-row {
+    grid-column: 3;
+    grid-row: 1 / span 3;
+  }
+
+  .control-group-scenario .var-state {
+    grid-column: 2;
+  }
+
   .btn-row button {
     width: 30px;
     height: 30px;
+  }
+
+  .scenario-btn {
+    min-width: 64px;
+    min-height: 30px;
   }
 }

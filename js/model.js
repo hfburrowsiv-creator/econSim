@@ -11,14 +11,15 @@ const LM_K = 4;
 // P_AS(Y) = Pe · (AS_FLOOR + AS_K · Y / (Y^FE − Y + ε))
 const AS_FLOOR = 0.5;   // AS starts at Pe · AS_FLOOR when Y = 0
 const AS_K     = 0.056; // controls steepness (reaches chart top ~0.96 · Y^FE)
+const AS_CAPACITY_GAP = 1.8;
 
-const state = {
+const BASE_STATE = {
   G:    5,  // Government spending           → shifts IS right ↑, AD right ↑
   T:    5,  // Taxes                         → shifts IS left ↑,  AD left ↑
   M:    5,  // Nominal money supply          → shifts LM right ↑, Mˢ right ↑, AD right ↑
   P:    5,  // Price level (user-chosen)     → shifts LM left ↑ (M/P falls), Mˢ left ↑
   Pe:   5,  // Expected price / cost level   → shifts AS up ↑
-  Ybar: 5,  // Full-employment output (Y^FE) → shifts Y^FE line right ↑
+  Ybar: 4.5, // Full-employment output (Y^FE) → shifts Y^FE line right ↑
   Yf:   5,  // Expected future income        → shifts IS right ↑ (boosts C today)
   MPKf: 5,  // Expected future profitability → shifts IS right ↑ (boosts I today)
   W:    5,  // Wealth                        → shifts IS right ↑ (boosts C today)
@@ -29,8 +30,10 @@ const state = {
   Uopt: 5,  // Optimal capital utilization   → raises productive capacity, shifts AS/Y^FE right ↑
   EPf:  5,  // Expected future price level   → shifts AS up ↑
   IC:   5,  // Input costs                   → shifts AS up ↑
-  CR:   5,  // Contract renegotiations       → shifts AS up ↑
+  CRActive: false, // Contract renegotiation test → sets AS to clear at Y^FE
 };
+
+const state = { ...BASE_STATE };
 
 // Fine-grained domain for smooth curves
 const Y_DOMAIN = Array.from({ length: 101 }, (_, i) => i * 0.1); // 0.0 → 10.0
@@ -54,10 +57,17 @@ function potentialOutput(s) {
 function asCostLevel(s) {
   const costPush =
     0.35 * (s.EPf - 5) +
-    0.35 * (s.IC - 5) +
-    0.25 * (s.CR - 5);
+    0.35 * (s.IC - 5);
 
   return safe(s.Pe + costPush);
+}
+
+function asAsymptote(s) {
+  return clamp(potentialOutput(s) + AS_CAPACITY_GAP, 1, MAX);
+}
+
+function resetState(s = state) {
+  Object.assign(s, BASE_STATE);
 }
 
 // ── IS Curve intercept ────────────────────────────────────────────────────────
@@ -136,22 +146,81 @@ function getADCurve(s) {
   };
 }
 
+function getADPriceAtY(s, Y) {
+  const isInt = isIntercept(s);
+  return clamp(safe(s.M) * Math.exp((isInt - 1.4 * Y) / LM_K), MIN, MAX);
+}
+
+function getASBasePriceAtY(s, Y) {
+  const yAsymptote = asAsymptote(s);
+  return clamp(asCostLevel(s) * (AS_FLOOR + AS_K * Y / (yAsymptote - Y + 0.01)), MIN, MAX);
+}
+
+function findASSourceYForPrice(s, targetP) {
+  const yAsymptote = asAsymptote(s);
+  let bestY = 0;
+  let bestDiff = Infinity;
+
+  for (let i = 0; i <= 999; i++) {
+    const Y = i * yAsymptote * 0.99 / 999;
+    const diff = Math.abs(getASBasePriceAtY(s, Y) - targetP);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      bestY = Y;
+    }
+  }
+
+  return bestY;
+}
+
+function getCRASShift(s) {
+  if (!s.CRActive) return { x: 0, y: 0 };
+
+  const targetY = potentialOutput(s);
+  const targetP = getADPriceAtY(s, targetY);
+  const sourceY = findASSourceYForPrice(s, targetP);
+  const sourceP = getASBasePriceAtY(s, sourceY);
+
+  return {
+    x: targetY - sourceY,
+    y: targetP - sourceP,
+  };
+}
+
+function getASPriceAtY(s, Y) {
+  if (s.CRActive) {
+    const shift = getCRASShift(s);
+    return clamp(getASBasePriceAtY(s, Y - shift.x) + shift.y, MIN, MAX);
+  }
+
+  return getASBasePriceAtY(s, Y);
+}
+
 // ── AS Curve (Keynesian single curve, three zones) ────────────────────────────
-// P_AS(Y) = Pₑ · (AS_FLOOR + AS_K · Y / (Y^FE − Y + ε))
+// P_AS(Y) = Pₑ · (AS_FLOOR + AS_K · Y / (Y_ASYM − Y + ε))
 //
 // Zone 1 — Keynesian (flat):   Y well below Y^FE → denominator large → P ≈ Pₑ·AS_FLOOR
-// Zone 2 — Intermediate:       Y approaches Y^FE → P rises noticeably
-// Zone 3 — Classical (steep):  Y → Y^FE          → denominator → 0 → P → ∞
+// Zone 2 — Intermediate:       Y approaches full employment → P rises noticeably
+// Zone 3 — Classical (steep):  Y → Y_ASYM        → denominator → 0 → P → ∞
 //
-// Shifts up when Pₑ↑ (cost-push); asymptote moves right when Ȳ↑
+// Shifts up when Pₑ↑ (cost-push); asymptote moves right with Ȳ plus capacity gap
 function getASCurve(s) {
-  const yfe  = potentialOutput(s);
-  const cost = asCostLevel(s);
-  // Only plot up to 99% of Y^FE (beyond that AS goes off-chart)
-  const Y_AS = Array.from({ length: 200 }, (_, i) => i * yfe * 0.99 / 199);
+  const yAsymptote = asAsymptote(s);
+
+  // Only plot up to 99% of the AS asymptote (beyond that AS goes off-chart).
+  const Y_AS = Array.from({ length: 200 }, (_, i) => i * yAsymptote * 0.99 / 199);
+
+  if (s.CRActive) {
+    const shift = getCRASShift(s);
+    return {
+      x: Y_AS.map(Y => Y + shift.x),
+      y: Y_AS.map(Y => clamp(getASBasePriceAtY(s, Y) + shift.y, MIN, MAX)),
+    };
+  }
+
   return {
     x: Y_AS,
-    y: Y_AS.map(Y => clamp(cost * (AS_FLOOR + AS_K * Y / (yfe - Y + 0.01)), MIN, MAX)),
+    y: Y_AS.map(Y => getASPriceAtY(s, Y)),
   };
 }
 
@@ -163,21 +232,20 @@ function getYFE(s) {
 }
 
 // ── AD/AS Equilibrium (numerical) ────────────────────────────────────────────
-// Solves P_AD(Y) = P_AS(Y) by grid search over Y ∈ [0, 0.99·Y^FE].
+// Solves P_AD(Y) = P_AS(Y) by grid search over Y ∈ [0, 0.99·Y_ASYM].
 // Returns the (Y, P) pair where the two curves intersect.
 function getADASEquilibrium(s) {
   const isInt = isIntercept(s);
   const safeM = safe(s.M);
-  const yfe   = potentialOutput(s);
-  const cost  = asCostLevel(s);
+  const yAsymptote = asAsymptote(s);
 
-  let bestY    = yfe * 0.5;
+  let bestY    = potentialOutput(s);
   let bestDiff = Infinity;
 
   for (let i = 1; i < 990; i++) {
-    const Y    = i * yfe * 0.99 / 999;
+    const Y    = i * yAsymptote * 0.99 / 999;
     const P_AD = safeM * Math.exp((isInt - 1.4 * Y) / LM_K);
-    const P_AS = cost * (AS_FLOOR + AS_K * Y / (yfe - Y + 0.01));
+    const P_AS = getASPriceAtY(s, Y);
 
     if (P_AS > MAX + 2) break; // AS gone off-chart — no intersection possible further right
 
@@ -185,6 +253,6 @@ function getADASEquilibrium(s) {
     if (diff < bestDiff) { bestDiff = diff; bestY = Y; }
   }
 
-  const P_eq = cost * (AS_FLOOR + AS_K * bestY / (yfe - bestY + 0.01));
+  const P_eq = getASPriceAtY(s, bestY);
   return { Y: clamp(bestY, MIN, MAX), P: clamp(P_eq, MIN, MAX) };
 }

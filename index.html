@@ -262,23 +262,21 @@
       </div>
 
       <!-- CR — Contract Renegotiations -->
-      <div class="control-group">
+      <div class="control-group control-group-scenario">
         <div class="var-label">CR</div>
         <div class="var-name">Contract Reneg.</div>
-        <div class="btn-row">
-          <button data-var="CR" data-action="up"   title="Increase contract renegotiations">▲</button>
-          <button data-var="CR" data-action="same" title="Reset contract renegotiations">●</button>
-          <button data-var="CR" data-action="down" title="Decrease contract renegotiations">▼</button>
+        <div class="scenario-row">
+          <button class="scenario-btn" data-cr-toggle type="button" title="Test contract renegotiation">test</button>
         </div>
-        <div class="var-state" data-display="CR">CR₀</div>
-        <div class="var-effect">AS ↑</div>
+        <div class="var-state" data-cr-status>baseline</div>
+        <div class="var-effect">AS clears at Y<sup>FE</sup></div>
       </div>
 
     </div><!-- .controls-row -->
   </div><!-- #controls -->
 
-  <script src="js/model.js?v=20260523"></script>
-  <script src="js/charts.js?v=20260523"></script>
-  <script src="js/app.js?v=20260523"></script>
+  <script src="js/model.js?v=20260523-cr-shift-only"></script>
+  <script src="js/charts.js?v=20260523-cr-shift-only"></script>
+  <script src="js/app.js?v=20260523-cr-shift-only"></script>
 </body>
 </html>
