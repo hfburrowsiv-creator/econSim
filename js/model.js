@@ -22,6 +22,14 @@ const state = {
   Yf:   5,  // Expected future income        → shifts IS right ↑ (boosts C today)
   MPKf: 5,  // Expected future profitability → shifts IS right ↑ (boosts I today)
   W:    5,  // Wealth                        → shifts IS right ↑ (boosts C today)
+  A:    5,  // Productivity                  → raises productive capacity, shifts AS/Y^FE right ↑
+  L:    5,  // Labor                         → raises productive capacity, shifts AS/Y^FE right ↑
+  Ndes: 5,  // Desirable number of hours     → raises productive capacity, shifts AS/Y^FE right ↑
+  K:    5,  // Capital stock                 → raises productive capacity, shifts AS/Y^FE right ↑
+  Uopt: 5,  // Optimal capital utilization   → raises productive capacity, shifts AS/Y^FE right ↑
+  EPf:  5,  // Expected future price level   → shifts AS up ↑
+  IC:   5,  // Input costs                   → shifts AS up ↑
+  CR:   5,  // Contract renegotiations       → shifts AS up ↑
 };
 
 // Fine-grained domain for smooth curves
@@ -31,6 +39,26 @@ function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
 // Guard values that appear in log() or division
 function safe(v) { return Math.max(v, 0.5); }
+
+function potentialOutput(s) {
+  const supplyShift =
+    0.35 * (s.A - 5) +
+    0.25 * (s.L - 5) +
+    0.20 * (s.Ndes - 5) +
+    0.30 * (s.K - 5) +
+    0.20 * (s.Uopt - 5);
+
+  return clamp(s.Ybar + supplyShift, 1, MAX);
+}
+
+function asCostLevel(s) {
+  const costPush =
+    0.35 * (s.EPf - 5) +
+    0.35 * (s.IC - 5) +
+    0.25 * (s.CR - 5);
+
+  return safe(s.Pe + costPush);
+}
 
 // ── IS Curve intercept ────────────────────────────────────────────────────────
 // Rises with G, Yf, MPKf, W; falls with T
@@ -117,19 +145,21 @@ function getADCurve(s) {
 //
 // Shifts up when Pₑ↑ (cost-push); asymptote moves right when Ȳ↑
 function getASCurve(s) {
-  const yfe  = Math.max(s.Ybar, 1);
+  const yfe  = potentialOutput(s);
+  const cost = asCostLevel(s);
   // Only plot up to 99% of Y^FE (beyond that AS goes off-chart)
   const Y_AS = Array.from({ length: 200 }, (_, i) => i * yfe * 0.99 / 199);
   return {
     x: Y_AS,
-    y: Y_AS.map(Y => clamp(s.Pe * (AS_FLOOR + AS_K * Y / (yfe - Y + 0.01)), MIN, MAX)),
+    y: Y_AS.map(Y => clamp(cost * (AS_FLOOR + AS_K * Y / (yfe - Y + 0.01)), MIN, MAX)),
   };
 }
 
 // ── Y^FE Line ─────────────────────────────────────────────────────────────────
 // Full-employment output — vertical reference line at Y = Ȳ
 function getYFE(s) {
-  return { x: [s.Ybar, s.Ybar], y: [MIN, MAX] };
+  const yfe = potentialOutput(s);
+  return { x: [yfe, yfe], y: [MIN, MAX] };
 }
 
 // ── AD/AS Equilibrium (numerical) ────────────────────────────────────────────
@@ -138,7 +168,8 @@ function getYFE(s) {
 function getADASEquilibrium(s) {
   const isInt = isIntercept(s);
   const safeM = safe(s.M);
-  const yfe   = Math.max(s.Ybar, 1);
+  const yfe   = potentialOutput(s);
+  const cost  = asCostLevel(s);
 
   let bestY    = yfe * 0.5;
   let bestDiff = Infinity;
@@ -146,7 +177,7 @@ function getADASEquilibrium(s) {
   for (let i = 1; i < 990; i++) {
     const Y    = i * yfe * 0.99 / 999;
     const P_AD = safeM * Math.exp((isInt - 1.4 * Y) / LM_K);
-    const P_AS = s.Pe * (AS_FLOOR + AS_K * Y / (yfe - Y + 0.01));
+    const P_AS = cost * (AS_FLOOR + AS_K * Y / (yfe - Y + 0.01));
 
     if (P_AS > MAX + 2) break; // AS gone off-chart — no intersection possible further right
 
@@ -154,6 +185,6 @@ function getADASEquilibrium(s) {
     if (diff < bestDiff) { bestDiff = diff; bestY = Y; }
   }
 
-  const P_eq = s.Pe * (AS_FLOOR + AS_K * bestY / (yfe - bestY + 0.01));
+  const P_eq = cost * (AS_FLOOR + AS_K * bestY / (yfe - bestY + 0.01));
   return { Y: clamp(bestY, MIN, MAX), P: clamp(P_eq, MIN, MAX) };
 }

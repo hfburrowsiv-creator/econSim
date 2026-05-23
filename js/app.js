@@ -10,6 +10,14 @@ const VAR_SYMBOLS = {
   Yf:   'Yᶠ',
   MPKf: 'MPKᶠ',
   W:    'W',
+  A:    'A',
+  L:    'L',
+  Ndes: 'N*',
+  K:    'K',
+  Uopt: 'uK*',
+  EPf:  "E(P')",
+  IC:   'IC',
+  CR:   'CR',
 };
 
 function getStateLabel(key) {
@@ -30,6 +38,20 @@ function updateDisplay() {
   });
 }
 
+function setVariable(key, action) {
+  if (!Object.prototype.hasOwnProperty.call(state, key)) {
+    console.warn(`Unknown variable: ${key}`);
+    return false;
+  }
+
+  if      (action === 'up')   state[key] = Math.min(state[key] + STEP, MAX);
+  else if (action === 'down') state[key] = Math.max(state[key] - STEP, MIN);
+  else if (action === 'same') state[key] = 5;
+  else return false;
+
+  return true;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initCharts();
   updateCharts(state);
@@ -42,9 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const key    = btn.dataset.var;
     const action = btn.dataset.action;
 
-    if      (action === 'up')   state[key] = Math.min(state[key] + STEP, MAX);
-    else if (action === 'down') state[key] = Math.max(state[key] - STEP, MIN);
-    else if (action === 'same') state[key] = 5;
+    if (!setVariable(key, action)) return;
 
     updateCharts(state);
     updateDisplay();

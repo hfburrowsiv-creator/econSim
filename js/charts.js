@@ -3,7 +3,7 @@
 const _CFG = { displayModeBar: false, responsive: true };
 
 const _LAYOUT_BASE = {
-  margin: { t: 44, r: 16, b: 52, l: 54 },
+  margin: { t: 92, r: 16, b: 52, l: 54 },
   showlegend: true,
   legend: { x: 0.55, y: 1.0, font: { size: 11 }, bgcolor: 'rgba(255,255,255,0.85)', borderwidth: 0 },
   paper_bgcolor: '#ffffff',
@@ -63,7 +63,10 @@ function _drawISLM(s) {
 
   Plotly.react('chart-islm', traces, {
     ..._LAYOUT_BASE,
-    title: { text: 'IS / LM Model', font: { size: 14, color: '#111827' } },
+    title: {
+      text: 'IS / LM Model<br><span style="font-size:11px;color:#6b7280;">IS = Investment Saving</span><br><span style="font-size:11px;color:#6b7280;">LM = Liquidity Preference-Money Supply</span>',
+      font: { size: 14, color: '#111827' },
+    },
     xaxis: _axis('Output  (Y)'),
     yaxis: _axis('Interest Rate  (r)'),
   }, _CFG);
@@ -108,7 +111,6 @@ function _drawADAS(s) {
   const as_    = getASCurve(s);
   const yfe    = getYFE(s);
   const adasEq = getADASEquilibrium(s);
-  const islmEq = getEquilibrium(s);  // IS/LM equilibrium at user-chosen P
 
   const traces = [
     {
@@ -126,18 +128,6 @@ function _drawADAS(s) {
       mode: 'lines', line: { color: '#374151', width: 2, dash: 'dash' },
       hovertemplate: 'Ȳ = %{x:.1f}<extra>Full-Employment Output</extra>',
     },
-    // Horizontal dashed line at user-chosen P — shows where IS/LM is operating
-    {
-      x: [0, 10], y: [s.P, s.P],
-      mode: 'lines', line: { color: '#2563eb', width: 1.5, dash: 'dot' },
-      showlegend: false, hoverinfo: 'skip',
-    },
-    // Blue diamond: IS/LM equilibrium Y at the user-chosen P (position on AD curve)
-    {
-      x: [islmEq.Y], y: [s.P], name: 'IS/LM at P',
-      mode: 'markers', marker: { color: '#2563eb', size: 11, symbol: 'diamond' },
-      hovertemplate: 'Y* = %{x:.2f}<br>P = %{y:.2f}<extra>IS/LM position on AD</extra>',
-    },
     // Black circle: AD ∩ AS general equilibrium
     {
       x: [adasEq.Y], y: [adasEq.P], name: 'AD/AS Eq.',
@@ -148,7 +138,10 @@ function _drawADAS(s) {
 
   Plotly.react('chart-adas', traces, {
     ..._LAYOUT_BASE,
-    title: { text: 'AD / AS Model', font: { size: 14, color: '#111827' } },
+    title: {
+      text: 'AD / AS Model<br><span style="font-size:11px;color:#6b7280;">AD = Aggregate Demand</span><br><span style="font-size:11px;color:#6b7280;">AS = Aggregate Supply</span>',
+      font: { size: 14, color: '#111827' },
+    },
     xaxis: _axis('Output  (Y)'),
     yaxis: _axis('Price Level  (P)'),
   }, _CFG);

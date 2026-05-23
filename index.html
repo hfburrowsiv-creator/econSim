@@ -170,11 +170,115 @@
         <div class="var-effect">IS →</div>
       </div>
 
+      <!-- A — Productivity -->
+      <div class="control-group">
+        <div class="var-label">A</div>
+        <div class="var-name">Productivity</div>
+        <div class="btn-row">
+          <button data-var="A" data-action="up"   title="Increase A">▲</button>
+          <button data-var="A" data-action="same" title="Reset A">●</button>
+          <button data-var="A" data-action="down" title="Decrease A">▼</button>
+        </div>
+        <div class="var-state" data-display="A">A₀</div>
+        <div class="var-effect">AS, Y<sup>FE</sup> →</div>
+      </div>
+
+      <!-- L — Labor -->
+      <div class="control-group">
+        <div class="var-label">L</div>
+        <div class="var-name">Labor</div>
+        <div class="btn-row">
+          <button data-var="L" data-action="up"   title="Increase L">▲</button>
+          <button data-var="L" data-action="same" title="Reset L">●</button>
+          <button data-var="L" data-action="down" title="Decrease L">▼</button>
+        </div>
+        <div class="var-state" data-display="L">L₀</div>
+        <div class="var-effect">AS, Y<sup>FE</sup> →</div>
+      </div>
+
+      <!-- Ndes — Desirable Number of Hours -->
+      <div class="control-group">
+        <div class="var-label">N<sup>*</sup></div>
+        <div class="var-name">Desired Hours</div>
+        <div class="btn-row">
+          <button data-var="Ndes" data-action="up"   title="Increase desired hours">▲</button>
+          <button data-var="Ndes" data-action="same" title="Reset desired hours">●</button>
+          <button data-var="Ndes" data-action="down" title="Decrease desired hours">▼</button>
+        </div>
+        <div class="var-state" data-display="Ndes">N*₀</div>
+        <div class="var-effect">AS, Y<sup>FE</sup> →</div>
+      </div>
+
+      <!-- K — Capital Stock -->
+      <div class="control-group">
+        <div class="var-label">K</div>
+        <div class="var-name">Capital Stock</div>
+        <div class="btn-row">
+          <button data-var="K" data-action="up"   title="Increase K">▲</button>
+          <button data-var="K" data-action="same" title="Reset K">●</button>
+          <button data-var="K" data-action="down" title="Decrease K">▼</button>
+        </div>
+        <div class="var-state" data-display="K">K₀</div>
+        <div class="var-effect">AS, Y<sup>FE</sup> →</div>
+      </div>
+
+      <!-- Uopt — Optimal Utilization of Capital -->
+      <div class="control-group">
+        <div class="var-label">uK<sup>*</sup></div>
+        <div class="var-name">Optimal Util.</div>
+        <div class="btn-row">
+          <button data-var="Uopt" data-action="up"   title="Increase optimal utilization">▲</button>
+          <button data-var="Uopt" data-action="same" title="Reset optimal utilization">●</button>
+          <button data-var="Uopt" data-action="down" title="Decrease optimal utilization">▼</button>
+        </div>
+        <div class="var-state" data-display="Uopt">uK*₀</div>
+        <div class="var-effect">AS, Y<sup>FE</sup> →</div>
+      </div>
+
+      <!-- EPf — Expected Future Price Level -->
+      <div class="control-group">
+        <div class="var-label">E(P')</div>
+        <div class="var-name">Exp. Future Price</div>
+        <div class="btn-row">
+          <button data-var="EPf" data-action="up"   title="Increase E(P')">▲</button>
+          <button data-var="EPf" data-action="same" title="Reset E(P')">●</button>
+          <button data-var="EPf" data-action="down" title="Decrease E(P')">▼</button>
+        </div>
+        <div class="var-state" data-display="EPf">E(P')₀</div>
+        <div class="var-effect">AS ↑</div>
+      </div>
+
+      <!-- IC — Input Costs -->
+      <div class="control-group">
+        <div class="var-label">IC</div>
+        <div class="var-name">Input Costs</div>
+        <div class="btn-row">
+          <button data-var="IC" data-action="up"   title="Increase input costs">▲</button>
+          <button data-var="IC" data-action="same" title="Reset input costs">●</button>
+          <button data-var="IC" data-action="down" title="Decrease input costs">▼</button>
+        </div>
+        <div class="var-state" data-display="IC">IC₀</div>
+        <div class="var-effect">AS ↑</div>
+      </div>
+
+      <!-- CR — Contract Renegotiations -->
+      <div class="control-group">
+        <div class="var-label">CR</div>
+        <div class="var-name">Contract Reneg.</div>
+        <div class="btn-row">
+          <button data-var="CR" data-action="up"   title="Increase contract renegotiations">▲</button>
+          <button data-var="CR" data-action="same" title="Reset contract renegotiations">●</button>
+          <button data-var="CR" data-action="down" title="Decrease contract renegotiations">▼</button>
+        </div>
+        <div class="var-state" data-display="CR">CR₀</div>
+        <div class="var-effect">AS ↑</div>
+      </div>
+
     </div><!-- .controls-row -->
   </div><!-- #controls -->
 
-  <script src="js/model.js"></script>
-  <script src="js/charts.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/model.js?v=20260523"></script>
+  <script src="js/charts.js?v=20260523"></script>
+  <script src="js/app.js?v=20260523"></script>
 </body>
 </html>
